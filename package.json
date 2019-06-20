@@ -1,0 +1,47 @@
+{
+  "name": "use-element-dimensions",
+  "description": "React Hook to figure out DOM Element dimensions with updates",
+  "version": "1.0.0",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "es2015": "dist/es/index.js",
+  "types": "dist/es/index.d.ts",
+  "sideEffects": false,
+  "keywords": [
+    "react",
+    "dimensions",
+    "size",
+    "resize",
+    "hook"
+  ],
+  "files": [
+    "/dist"
+  ],
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/danielkov/use-element-dimensions.git"
+  },
+  "scripts": {
+    "build": "rm -rf dist && concurrently \"yarn build:es6\" \"yarn build:esm\" \"yarn build:cjs\"",
+    "build:es6": "tsc --module es6 --target es6 --outDir dist/es",
+    "build:esm": "tsc --module es6 --target es5 --outDir dist/esm",
+    "build:cjs": "tsc --module commonjs --target es5 --outDir dist/cjs",
+    "test": "jest"
+  },
+  "author": "Daniel Kovacs <kovacsemod@gmail.com>",
+  "dependencies": {
+    "@juggle/resize-observer": "2.0.3"
+  },
+  "peerDependencies": {
+    "react": "^16.8.0"
+  },
+  "devDependencies": {
+    "@types/react": "16.8.0",
+    "@types/react-dom": "16.8.0",
+    "react": "16.8.0",
+    "react-dom": "16.8.0",
+    "typescript": "3.5.2",
+    "concurrently": "4.1.0"
+  }
+}
