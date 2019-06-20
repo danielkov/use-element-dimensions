@@ -33,4 +33,4 @@ Everything in this package is in `src/index.ts`. If you want to run an example t
 
 ### Building
 
-
+Run `yarn build` to build for the three targets specified.
