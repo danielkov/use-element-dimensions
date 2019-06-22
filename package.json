@@ -24,14 +24,16 @@
   },
   "scripts": {
     "build": "rm -rf dist && rollup -c --name 'useDimensions'",
-    "start": "parcel example/test/index.html"
+    "start": "parcel example/test/index.html",
+    "test": "cypress run"
   },
   "author": "Daniel Kovacs <kovacsemod@gmail.com>",
   "dependencies": {
     "@juggle/resize-observer": "2.0.3"
   },
   "peerDependencies": {
-    "react": "^16.8.0"
+    "react": "^16.8.0",
+    "react-dom": "^16.8.0"
   },
   "devDependencies": {
     "@babel/preset-env": "7.4.5",

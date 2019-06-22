@@ -1,0 +1,13 @@
+@keyframes squeeze {
+    from {
+        width: 100px;
+    }
+
+    to {
+        width: 100%;
+    }
+}
+
+.example {
+    animation: squeeze 3s infinite alternate;
+}

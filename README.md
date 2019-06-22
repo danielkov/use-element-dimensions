@@ -34,3 +34,7 @@ Everything in this package is in `src/index.ts`. If you want to run an example t
 ### Building
 
 Run `yarn build` to build for the three targets specified.
+
+### Testing
+
+Integration tests use [Cypress](https://cypress.io), because it is hard to do unit tests for hooks and viewport resizing.

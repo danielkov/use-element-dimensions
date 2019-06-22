@@ -1,0 +1,38 @@
+version: 2.1
+orbs:
+  cypress: cypress-io/cypress@1
+
+workflows:
+  build-test-deploy:
+    jobs:
+      # first get the source code and install npm dependencies
+      - cypress/install:
+          # run a custom app build step
+          build: 'npm run build'
+      - cypress/run:
+          # make sure app has been installed and built
+          # before running tests across multiple machines
+          # this avoids installing same dependencies 10 times
+          requires:
+            - cypress/install
+          record: true # record results on Cypress Dashboard
+          group: 'all tests' # name this group "all tests" on the dashboard
+          start: 'npm start' # start server before running tests
+      - deploy:
+          requires:
+            - cypress/run
+          filters:
+            tags:
+              only: /^v.*/
+            branches:
+              ignore: /.*/
+          steps:
+            - run:
+                name: Authenticate with registry
+                command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+            - run:
+                name: Build package
+                command: npm run build
+            - run:
+                name: Publish package
+                command: npm publish
