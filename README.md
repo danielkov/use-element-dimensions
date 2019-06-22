@@ -1,4 +1,4 @@
-## `use-element-dimensions`
+## `use-element-dimensions` [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=for-the-badge)](https://cypress.io) ![CircleCI](https://img.shields.io/circleci/build/github/danielkov/use-element-dimensions.svg?style=for-the-badge) ![npm](https://img.shields.io/npm/v/use-element-dimensions.svg?style=for-the-badge) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/use-element-dimensions.svg?style=for-the-badge)
 
 React Hook to figure out DOM Element dimensions with updates
 
