@@ -37,7 +37,6 @@ workflows:
       - cypress/install:
           # run a custom app build step
           build: 'npm run build'
-          cache-key: v1-dependencies-{{ checksum "package.json" }}
       - cypress/run:
           # make sure app has been installed and built
           # before running tests across multiple machines
