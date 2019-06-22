@@ -2,6 +2,34 @@ version: 2.1
 orbs:
   cypress: cypress-io/cypress@1
 
+jobs:
+  deploy:
+    docker:
+      - image: circleci/node:8.9.1
+    working_directory: ~/repo
+    steps:
+    - checkout
+    - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+    - run:
+        name: Authenticate with registry
+        command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+    - run:
+        name: Install dependencies
+        command: npm ci
+    - run:
+        name: Build package
+        command: npm run build
+    - run:
+        name: Publish package
+        command: npm publish
+    - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
 workflows:
   build-test-deploy:
     jobs:
@@ -15,9 +43,13 @@ workflows:
           # this avoids installing same dependencies 10 times
           requires:
             - cypress/install
+          wait-on: 'http://localhost:1234'
           record: true # record results on Cypress Dashboard
+          parallel: true # split all specs across machines
+          parallelism: 4
           group: 'all tests' # name this group "all tests" on the dashboard
           start: 'npm start' # start server before running tests
+          cache-key: v1-dependencies-{{ checksum "package.json" }}
       - deploy:
           requires:
             - cypress/run
@@ -26,13 +58,3 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-          steps:
-            - run:
-                name: Authenticate with registry
-                command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
-            - run:
-                name: Build package
-                command: npm run build
-            - run:
-                name: Publish package
-                command: npm publish

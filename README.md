@@ -38,3 +38,10 @@ Run `yarn build` to build for the three targets specified.
 ### Testing
 
 Integration tests use [Cypress](https://cypress.io), because it is hard to do unit tests for hooks and viewport resizing.
+<<<<<<< HEAD
+
+### Examples
+
+The examples live in the `example` directory. To run any of them, make sure `devDependencies` are installed and run `yarn parcel example/<name>/index.html`.
+=======
+>>>>>>> 84ad5f00451c7aaba11c9a2a7b77fdcbc8dee6ec

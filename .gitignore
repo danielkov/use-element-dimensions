@@ -1,4 +1,6 @@
 node_modules
 .cache
 dist
+
+yarn-error.log
 .rpt2_cache
