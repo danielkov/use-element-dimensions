@@ -2,6 +2,34 @@ version: 2.1
 orbs:
   cypress: cypress-io/cypress@1
 
+jobs:
+  deploy:
+    docker:
+      - image: circleci/node:8.9.1
+    working_directory: ~/repo
+    steps:
+    - checkout
+    - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          - v1-dependencies-
+    - run:
+        name: Authenticate with registry
+        command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+    - run:
+        name: Install dependencies
+        command: npm install
+    - run:
+        name: Build package
+        command: npm run build
+    - run:
+        name: Publish package
+        command: npm publish
+    - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
 workflows:
   build-test-deploy:
     jobs:
@@ -26,13 +54,3 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-          steps:
-            - run:
-                name: Authenticate with registry
-                command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
-            - run:
-                name: Build package
-                command: npm run build
-            - run:
-                name: Publish package
-                command: npm publish
