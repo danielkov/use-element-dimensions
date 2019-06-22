@@ -37,12 +37,22 @@ workflows:
       - cypress/install:
           # run a custom app build step
           build: 'npm run build'
+          filters:
+            branches:
+              only:
+                - master
+                - release
       - cypress/run:
           # make sure app has been installed and built
           # before running tests across multiple machines
           # this avoids installing same dependencies 10 times
           requires:
             - cypress/install
+          filters:
+            branches:
+              only:
+                - master
+                - release
           wait-on: 'http://localhost:1234'
           record: true # record results on Cypress Dashboard
           parallel: true # split all specs across machines
