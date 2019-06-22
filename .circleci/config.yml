@@ -55,4 +55,4 @@ workflows:
             - cypress/run
           filters:
             branches:
-              only: master
+              only: release
