@@ -42,7 +42,7 @@
     "@types/react-dom": "16.8.4",
     "babel-core": "6.26.3",
     "babel-preset-env": "1.7.0",
-    "cypress": "3.3.1",
+    "cypress": "3.4.1",
     "parcel": "1.12.3",
     "react": "16.8.0",
     "react-dom": "16.8.0",
