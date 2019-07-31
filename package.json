@@ -29,7 +29,7 @@
   },
   "author": "Daniel Kovacs <kovacsemod@gmail.com>",
   "dependencies": {
-    "@juggle/resize-observer": "2.0.3"
+    "@juggle/resize-observer": "2.3.0"
   },
   "peerDependencies": {
     "react": "^16.8.0",
