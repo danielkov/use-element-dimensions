@@ -810,10 +810,10 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^12.0.9"
 
-"@juggle/resize-observer@2.0.3":
-  version "2.0.3"
-  resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-2.0.3.tgz#475e2edf82803b617468c251df3a898ce59190a0"
-  integrity sha512-TLcZbPJHV5qHEweZCKM6RBCrq/QZN7MaHy8zaM9zo6YpQXxSKSB8bAfKjvKGj5IKUUeJ22ZVf8pTONGbnZCQNg==
+"@juggle/resize-observer@2.3.0":
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/@juggle/resize-observer/-/resize-observer-2.3.0.tgz#c528b369a2959e49aa6aaace5640c8e4748e9084"
+  integrity sha512-vCS2dz1HAG760+vADa7Fol/NhrmdyDa58Nvq39TpdwYjCqTEDFmIFCDGRiKGSw4GPoDRcx/+xwOYlJdMeNUKRw==
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"
