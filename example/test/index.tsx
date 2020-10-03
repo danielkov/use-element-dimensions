@@ -1,7 +1,7 @@
 import * as React from "react";
-
-import useDimensions from "../../dist/esm";
 import { render } from "react-dom";
+
+import useDimensions from "../../";
 
 const Test = () => {
   const [{ width, height }, ref] = useDimensions();

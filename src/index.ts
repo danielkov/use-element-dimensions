@@ -1,18 +1,31 @@
-import * as React from "react";
-import ResizeObserver from "@juggle/resize-observer";
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 
-const resizeObserver = new ResizeObserver(entries => {
-  for (let entry of entries) {
-    const {
-      contentRect: { width, height },
-      target
-    } = entry;
-    const set = (target as $Element).$$useElementDimensionsSet;
-    if (set) {
-      set({ width, height });
-    }
-  }
-});
+const isServer = typeof window === "undefined";
+
+const noop = () => {};
+
+const noopObserver = { observe: noop, unobserve: noop };
+
+const resizeObserver = isServer
+  ? noopObserver
+  : new ResizeObserver((entries) => {
+      for (let entry of entries) {
+        const {
+          contentRect: { width, height },
+          target,
+        } = entry;
+        const set = (target as $Element).$$useElementDimensionsSet;
+        if (set) {
+          set({ width, height });
+        }
+      }
+    });
 
 type $Element = Element & {
   $$useElementDimensionsSet?: React.Dispatch<
@@ -23,23 +36,36 @@ type $Element = Element & {
   >;
 };
 
+const useIsomorphicLayoutEffect = isServer ? useEffect : useLayoutEffect;
+
 const useDimensions = (): [
   { width: number; height: number },
-  React.RefObject<Element>
+  (element: Element) => void
 ] => {
-  const ref = React.useRef<$Element>(null);
+  const ref = useRef<$Element>(null);
 
-  const [dimensions, set] = React.useState({ width: 0, height: 0 });
+  const [dimensions, set] = useState({ width: 0, height: 0 });
 
-  React.useLayoutEffect(() => {
-    if (ref.current && ref.current instanceof Element) {
-      ref.current.$$useElementDimensionsSet = set;
-      resizeObserver.observe(ref.current);
-      return () => resizeObserver.unobserve(ref.current as Element);
+  const setRef = useCallback((element: Element) => {
+    if (ref.current) {
+      resizeObserver.unobserve(ref.current);
     }
-  }, [ref.current]);
+    if (element instanceof Element) {
+      (element as $Element).$$useElementDimensionsSet = set;
+      resizeObserver.observe(element);
+    }
+  }, []);
 
-  return [dimensions, ref];
+  useIsomorphicLayoutEffect(
+    () => () => {
+      if (ref.current) {
+        resizeObserver.unobserve(ref.current);
+      }
+    },
+    []
+  );
+
+  return [dimensions, setRef];
 };
 
 export default useDimensions;

@@ -17,6 +17,8 @@ const Example = () => {
 };
 ```
 
+---
+
 ### Use case
 
 There are already some hook libraries that provide dimensions on first render or even update them on `window` resize event, however in many cases this may not be sufficient. HTML DOM Elements can resize in response to a lot of things we don't expect, only one of which is screen size, for example:
@@ -24,8 +26,6 @@ There are already some hook libraries that provide dimensions on first render or
 - When animating any of the size properties.
 - Setting a size properties on an encapsulating DOM Node.
 - Orientation change (`resize` triggers in this case - or it should).
-
-This package uses [`@juggle/resize-observer`](https://juggle.studio/resize-observer/) to [Ponyfill](https://github.com/sindresorhus/ponyfill) `ResizeObserver` API. This means that you can expect the same behaviour out of every browser, regardless of them having implemented the actual API or not.
 
 ### Development
 
