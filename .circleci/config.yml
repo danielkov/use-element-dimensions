@@ -8,24 +8,21 @@ jobs:
       - image: circleci/node:10.22.1
     working_directory: ~/repo
     steps:
-    - checkout
-    - restore_cache:
+      - checkout
+      - restore_cache:
           keys:
-          - v1-dependencies-{{ checksum "package.json" }}
-          - v1-dependencies-
-    - run:
-        name: Authenticate with registry
-        command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
-    - run:
-        name: Install dependencies
-        command: npm ci
-    - run:
-        name: Build package
-        command: npm run build
-    - run:
-        name: Publish package
-        command: npm publish
-    - save_cache:
+            - v1-dependencies-{{ checksum "package.json" }}
+            - v1-dependencies-
+      - run:
+          name: Authenticate with registry
+          command: echo "//registry.npmjs.org/:_authToken=$npm_TOKEN" > ~/repo/.npmrc
+      - run:
+          name: Install dependencies
+          command: npm ci
+      - run:
+          name: Build package
+          command: npm run build
+      - save_cache:
           paths:
             - node_modules
           key: v1-dependencies-{{ checksum "package.json" }}
@@ -36,7 +33,7 @@ workflows:
       # first get the source code and install npm dependencies
       - cypress/install:
           # run a custom app build step
-          build: 'npm run build'
+          build: "npm run build"
           filters:
             branches:
               only:
@@ -53,12 +50,12 @@ workflows:
               only:
                 - master
                 - release
-          wait-on: 'http://localhost:1234'
+          wait-on: "http://localhost:1234"
           record: true # record results on Cypress Dashboard
           parallel: true # split all specs across machines
           parallelism: 4
-          group: 'all tests' # name this group "all tests" on the dashboard
-          start: 'npm start' # start server before running tests
+          group: "all tests" # name this group "all tests" on the dashboard
+          start: "npm start" # start server before running tests
           cache-key: v1-dependencies-{{ checksum "package.json" }}
       - deploy:
           requires:
