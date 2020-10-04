@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [2.1.0](https://github.com/danielkov/use-element-dimensions/compare/v2.0.0...v2.1.0) (2020-10-04)
+
+
+### Features
+
+* expand API ([4908ccd](https://github.com/danielkov/use-element-dimensions/commit/4908ccdcb501cc2f84b94758444860c256b7502c))
+
 ## [2.0.0](https://github.com/danielkov/use-element-dimensions/compare/v1.0.0...v2.0.0) (2020-10-03)
 
 
