@@ -17,7 +17,59 @@ const Example = () => {
 };
 ```
 
----
+### API
+
+The first item in the tuple returned by the hook includes all properties of the latest [`ResizeObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry) for the specific element.
+
+#### `borderBoxSize`
+
+An object containing the new border box size of the observed element when the callback is run.
+
+#### `contentBoxSize`
+
+An object containing the new content box size of the observed element when the callback is run.
+
+#### `contentRect`
+
+A DOMRectReadOnly object containing the new size of the observed element when the callback is run. Note that this is better supported than the above two properties, but it is left over from an earlier implementation of the Resize Observer API, is still included in the spec for web compat reasons, and may be deprecated in future versions.
+
+#### `target`
+
+A reference to the Element or SVGElement being observed.
+
+The `DOMRect` returned by `target.getBoundingClientRect` also lends its properties to this value.
+
+#### `x`
+
+The x coordinate of the DOMRect's origin.
+
+#### `y`
+
+The y coordinate of the DOMRect's origin.
+
+#### `width`
+
+The width of the DOMRect.
+
+#### `height`
+
+The height of the DOMRect.
+
+#### `top`
+
+Returns the top coordinate value of the DOMRect (has the same value as y, or y + height if height is negative.)
+
+#### `right`
+
+Returns the right coordinate value of the DOMRect (has the same value as x + width, or x if width is negative.)
+
+#### `bottom`
+
+Returns the bottom coordinate value of the DOMRect (has the same value as y + height, or y if height is negative.)
+
+#### `left`
+
+Returns the left coordinate value of the DOMRect (has the same value as x, or x + width if width is negative.)
 
 ### Use case
 

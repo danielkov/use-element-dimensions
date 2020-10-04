@@ -16,35 +16,39 @@ const resizeObserver = isServer
   ? noopObserver
   : new ResizeObserver((entries) => {
       for (let entry of entries) {
-        const {
-          contentRect: { width, height },
-          target,
-        } = entry;
+        const { target } = entry;
+        const boundingClient = target.getBoundingClientRect();
         const set = (target as $Element).$$useElementDimensionsSet;
         if (set) {
-          set({ width, height });
+          set(Object.assign(boundingClient, entry));
         }
       }
     });
 
+export type ElementDimensions = ResizeObserverEntry & DOMRect;
+
 type $Element = Element & {
   $$useElementDimensionsSet?: React.Dispatch<
-    React.SetStateAction<{
-      width: number;
-      height: number;
-    }>
+    React.SetStateAction<ElementDimensions>
   >;
 };
 
 const useIsomorphicLayoutEffect = isServer ? useEffect : useLayoutEffect;
 
-const useDimensions = (): [
-  { width: number; height: number },
-  (element: Element) => void
-] => {
+const contentRect = new DOMRectReadOnly();
+const domRect = new DOMRect();
+const size = { inlineSize: 0, blockSize: 0 };
+const defaultValue: ElementDimensions = Object.assign(domRect, {
+  contentBoxSize: size,
+  borderBoxSize: size,
+  contentRect,
+  target: (null as unknown) as Element,
+});
+
+const useDimensions = (): [ElementDimensions, (element: Element) => void] => {
   const ref = useRef<$Element>(null);
 
-  const [dimensions, set] = useState({ width: 0, height: 0 });
+  const [dimensions, set] = useState<ElementDimensions>(defaultValue);
 
   const setRef = useCallback((element: Element) => {
     if (ref.current) {
