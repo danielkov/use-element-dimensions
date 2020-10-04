@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.1](https://github.com/danielkov/use-element-dimensions/compare/v2.1.0...v2.1.1) (2020-10-04)
+
+
+### Bug Fixes
+
+* stub DOMRect for SSR ([346dca4](https://github.com/danielkov/use-element-dimensions/commit/346dca44f3b08c0a12356910814b7db72b6f4494))
+
 ## [2.1.0](https://github.com/danielkov/use-element-dimensions/compare/v2.0.0...v2.1.0) (2020-10-04)
 
 
