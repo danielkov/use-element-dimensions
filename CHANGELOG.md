@@ -2,6 +2,13 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+### [2.1.2](https://github.com/danielkov/use-element-dimensions/compare/v2.1.1...v2.1.2) (2020-10-29)
+
+
+### Bug Fixes
+
+* noop instead of error, when not supported ([8fde267](https://github.com/danielkov/use-element-dimensions/commit/8fde267140b6d46a73fce30e3c8fbc36e48a0aae))
+
 ### [2.1.1](https://github.com/danielkov/use-element-dimensions/compare/v2.1.0...v2.1.1) (2020-10-04)
 
 
