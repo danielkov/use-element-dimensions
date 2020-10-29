@@ -8,11 +8,13 @@ import {
 
 const isServer = typeof window === "undefined";
 
+const isSupported = !isServer && "ResizeObserver" in window;
+
 const noop = () => {};
 
 const noopObserver = { observe: noop, unobserve: noop };
 
-const resizeObserver = isServer
+const resizeObserver = !isSupported
   ? noopObserver
   : new ResizeObserver((entries) => {
       for (let entry of entries) {
