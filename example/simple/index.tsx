@@ -1,7 +1,8 @@
 import * as React from "react";
-import { render } from "react-dom";
-import useDimensions from "../../src";
 import { useCallback, useState } from "react";
+import { render } from "react-dom";
+
+import useDimensions from "../../src";
 
 const root = document.getElementById("root");
 

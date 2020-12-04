@@ -73,12 +73,15 @@ const defaultValue: ElementDimensions = Object.assign(domRect, {
   target: (null as unknown) as Element,
 });
 
-const useDimensions = (): [ElementDimensions, (element: Element) => void] => {
+const useDimensions = (): [
+  ElementDimensions,
+  (element?: Element | null) => void
+] => {
   const ref = useRef<$Element>(null);
 
   const [dimensions, set] = useState<ElementDimensions>(defaultValue);
 
-  const setRef = useCallback((element: Element) => {
+  const setRef = useCallback((element?: Element | null) => {
     if (ref.current) {
       resizeObserver.unobserve(ref.current);
     }
