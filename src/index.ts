@@ -73,6 +73,10 @@ const defaultValue: ElementDimensions = Object.assign(domRect, {
   target: (null as unknown) as Element,
 });
 
+const isElement = (element?: Element | null): element is $Element => {
+  return element?.nodeType === 1; // ELEMENT_NODE
+}
+
 const useDimensions = (): [
   ElementDimensions,
   (element?: Element | null) => void
@@ -85,8 +89,8 @@ const useDimensions = (): [
     if (ref.current) {
       resizeObserver.unobserve(ref.current);
     }
-    if (element instanceof Element) {
-      (element as $Element).$$useElementDimensionsSet = set;
+    if (isElement(element)) {
+      element.$$useElementDimensionsSet = set;
       resizeObserver.observe(element);
     }
   }, []);
