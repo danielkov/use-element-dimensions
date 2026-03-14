@@ -2,6 +2,22 @@
 
 All notable changes to this project will be documented in this file. See [standard-version](https://github.com/conventional-changelog/standard-version) for commit guidelines.
 
+## [3.0.0](https://github.com/danielkov/use-element-dimensions/compare/v2.1.3...v3.0.0) (2026-03-14)
+
+
+### ⚠ BREAKING CHANGES
+
+* useDimensions now returns the raw ResizeObserverEntry payload and consumers needing viewport DOMRect values must switch to useElementRect.
+
+### Features
+
+* split ResizeObserver entry and element rect hooks ([1c25c9c](https://github.com/danielkov/use-element-dimensions/commit/1c25c9c11ff54f917ddbbd390ed1589ffe3e8e28))
+
+
+### Bug Fixes
+
+* renovate config ([b0cea61](https://github.com/danielkov/use-element-dimensions/commit/b0cea612f419900b34b3e4a4cf9ec83d6af0e632))
+
 ### [2.1.3](https://github.com/danielkov/use-element-dimensions/compare/v2.1.2...v2.1.3) (2020-12-04)
 
 ### [2.1.2](https://github.com/danielkov/use-element-dimensions/compare/v2.1.1...v2.1.2) (2020-10-29)

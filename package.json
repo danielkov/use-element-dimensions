@@ -1,7 +1,7 @@
 {
   "name": "use-element-dimensions",
   "description": "React hook for observing DOM element dimensions with live updates",
-  "version": "2.1.3",
+  "version": "3.0.0",
   "main": "dist/cjs/index.js",
   "module": "dist/esm/index.js",
   "browser": "dist/umd/index.js",
