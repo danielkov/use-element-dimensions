@@ -3,104 +3,362 @@ import {
   useEffect,
   useLayoutEffect,
   useRef,
-  useState,
 } from "react";
+import { useSyncExternalStore } from "use-sync-external-store/shim";
 
 const isServer = typeof window === "undefined";
 
-const isSupported = !isServer && "ResizeObserver" in window;
-
-const noop = () => {};
-
-const noopObserver = { observe: noop, unobserve: noop };
-
-const resizeObserver = !isSupported
-  ? noopObserver
-  : new ResizeObserver((entries) => {
-      for (let entry of entries) {
-        const { target } = entry;
-        const boundingClient = target.getBoundingClientRect();
-        const set = (target as $Element).$$useElementDimensionsSet;
-        if (set) {
-          set(Object.assign(boundingClient, entry));
-        }
-      }
-    });
-
-export type ElementDimensions = ResizeObserverEntry & DOMRect;
-
-type $Element = Element & {
-  $$useElementDimensionsSet?: React.Dispatch<
-    React.SetStateAction<ElementDimensions>
-  >;
-};
-
 const useIsomorphicLayoutEffect = isServer ? useEffect : useLayoutEffect;
 
-// NOTE(danielkov): this is used to stub DOMRectReadonly on the server
-class Rect {
-  readonly bottom: number;
-  readonly height: number;
-  readonly left: number;
-  readonly right: number;
-  readonly top: number;
-  readonly width: number;
-  readonly x: number;
-  readonly y: number;
+type Listener = () => void;
+type SetRef = (element?: Element | null) => void;
 
-  constructor() {
-    this.bottom = 0;
-    this.height = 0;
-    this.left = 0;
-    this.right = 0;
-    this.top = 0;
-    this.width = 0;
-    this.x = 0;
-    this.y = 0;
-  }
-  toJSON() {
-    return JSON.stringify(this);
-  }
+export type ElementDimensions = ResizeObserverEntry;
+export type ElementRect = DOMRect;
+
+interface EntrySubscriber {
+  handleEntry(entry: ResizeObserverEntry): void;
 }
 
-const contentRect = new Rect();
-const domRect = new Rect();
-const size = { inlineSize: 0, blockSize: 0 };
-const defaultValue: ElementDimensions = Object.assign(domRect, {
-  contentBoxSize: size,
-  borderBoxSize: size,
-  contentRect,
-  target: (null as unknown) as Element,
+interface ElementObservationStore<T> extends EntrySubscriber {
+  cleanup(): void;
+  flushPendingNotification(): void;
+  getServerSnapshot(): T;
+  getSnapshot(): T;
+  setElement(element: Element | null): void;
+  subscribe(listener: Listener): () => void;
+}
+
+const canObserve = () => typeof ResizeObserver !== "undefined";
+
+const createRectSnapshot = (rect: DOMRectReadOnly): DOMRect => ({
+  bottom: rect.bottom,
+  height: rect.height,
+  left: rect.left,
+  right: rect.right,
+  top: rect.top,
+  width: rect.width,
+  x: rect.x,
+  y: rect.y,
+  toJSON() {
+    return {
+      bottom: this.bottom,
+      height: this.height,
+      left: this.left,
+      right: this.right,
+      top: this.top,
+      width: this.width,
+      x: this.x,
+      y: this.y,
+    };
+  },
 });
 
-const useDimensions = (): [
-  ElementDimensions,
-  (element?: Element | null) => void
-] => {
-  const ref = useRef<$Element>(null);
-
-  const [dimensions, set] = useState<ElementDimensions>(defaultValue);
-
-  const setRef = useCallback((element?: Element | null) => {
-    if (ref.current) {
-      resizeObserver.unobserve(ref.current);
-    }
-    if (element instanceof Element) {
-      (element as $Element).$$useElementDimensionsSet = set;
-      resizeObserver.observe(element);
-    }
-  }, []);
-
-  useIsomorphicLayoutEffect(
-    () => () => {
-      if (ref.current) {
-        resizeObserver.unobserve(ref.current);
-      }
+const createEmptyRect = () =>
+  createRectSnapshot({
+    bottom: 0,
+    height: 0,
+    left: 0,
+    right: 0,
+    top: 0,
+    width: 0,
+    x: 0,
+    y: 0,
+    toJSON() {
+      return this;
     },
-    []
-  );
+  });
 
-  return [dimensions, setRef];
+const emptyRect = Object.freeze(createEmptyRect()) as ElementRect;
+
+const emptyBoxSize = Object.freeze([{ inlineSize: 0, blockSize: 0 }]) as
+  ReadonlyArray<ResizeObserverSize>;
+
+const emptyDimensions = Object.freeze({
+  borderBoxSize: emptyBoxSize,
+  contentBoxSize: emptyBoxSize,
+  devicePixelContentBoxSize: emptyBoxSize,
+  contentRect: emptyRect,
+  target: (null as unknown) as Element,
+}) as ElementDimensions;
+
+let sharedObserver: ResizeObserver | null = null;
+const subscribersByElement = new Map<Element, Set<EntrySubscriber>>();
+
+const getSharedObserver = (): ResizeObserver => {
+  if (!sharedObserver) {
+    sharedObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        subscribersByElement.get(entry.target)?.forEach((subscriber) => {
+          subscriber.handleEntry(entry);
+        });
+      }
+    });
+  }
+
+  return sharedObserver;
 };
 
+const observeElement = (element: Element, subscriber: EntrySubscriber) => {
+  let subscribers = subscribersByElement.get(element);
+
+  if (!subscribers) {
+    subscribers = new Set<EntrySubscriber>();
+    subscribersByElement.set(element, subscribers);
+    getSharedObserver().observe(element);
+  }
+
+  subscribers.add(subscriber);
+};
+
+const unobserveElement = (element: Element, subscriber: EntrySubscriber) => {
+  const subscribers = subscribersByElement.get(element);
+
+  if (!subscribers) {
+    return;
+  }
+
+  subscribers.delete(subscriber);
+
+  if (subscribers.size > 0) {
+    return;
+  }
+
+  subscribersByElement.delete(element);
+
+  if (sharedObserver) {
+    sharedObserver.unobserve(element);
+
+    if (subscribersByElement.size === 0) {
+      sharedObserver.disconnect();
+      sharedObserver = null;
+    }
+  }
+};
+
+const areRectsEqual = (a: DOMRectReadOnly, b: DOMRectReadOnly) =>
+  a.bottom === b.bottom &&
+  a.height === b.height &&
+  a.left === b.left &&
+  a.right === b.right &&
+  a.top === b.top &&
+  a.width === b.width &&
+  a.x === b.x &&
+  a.y === b.y;
+
+const readElementRect = (element: Element): ElementRect =>
+  createRectSnapshot(element.getBoundingClientRect());
+
+abstract class BaseStore<T> implements ElementObservationStore<T> {
+  private readonly listeners = new Set<Listener>();
+  private readonly serverSnapshot: T;
+  private hasPendingNotification = false;
+  protected element: Element | null = null;
+  protected snapshot: T;
+
+  constructor(serverSnapshot: T) {
+    this.serverSnapshot = serverSnapshot;
+    this.snapshot = serverSnapshot;
+  }
+
+  subscribe = (listener: Listener) => {
+    this.listeners.add(listener);
+
+    return () => {
+      this.listeners.delete(listener);
+    };
+  };
+
+  getSnapshot = () => this.snapshot;
+
+  getServerSnapshot = () => this.serverSnapshot;
+
+  setElement = (element: Element | null) => {
+    if (this.element === element) {
+      return;
+    }
+
+    if (this.element && canObserve()) {
+      unobserveElement(this.element, this);
+    }
+
+    this.element = element;
+    this.handleElementChange(element);
+  };
+
+  flushPendingNotification = () => {
+    if (!this.hasPendingNotification || !this.listeners.size) {
+      return;
+    }
+
+    this.hasPendingNotification = false;
+    this.emit();
+  };
+
+  cleanup = () => {
+    this.hasPendingNotification = false;
+
+    if (this.element && canObserve()) {
+      unobserveElement(this.element, this);
+    }
+
+    this.element = null;
+    this.snapshot = this.serverSnapshot;
+  };
+
+  protected observeCurrentElement = () => {
+    if (this.element && canObserve()) {
+      observeElement(this.element, this);
+    }
+  };
+
+  protected resetSnapshot = () => {
+    this.updateSnapshot(this.serverSnapshot);
+  };
+
+  protected updateSnapshot = (snapshot: T) => {
+    this.snapshot = snapshot;
+
+    if (!this.listeners.size) {
+      this.hasPendingNotification = true;
+      return;
+    }
+
+    this.emit();
+  };
+
+  private emit = () => {
+    this.listeners.forEach((listener) => {
+      listener();
+    });
+  };
+
+  abstract handleEntry(entry: ResizeObserverEntry): void;
+
+  protected abstract handleElementChange(element: Element | null): void;
+}
+
+class ElementDimensionsStore extends BaseStore<ElementDimensions> {
+  constructor() {
+    super(emptyDimensions);
+  }
+
+  handleEntry = (entry: ResizeObserverEntry) => {
+    this.updateSnapshot(entry);
+  };
+
+  protected handleElementChange = (element: Element | null) => {
+    if (!element) {
+      this.resetSnapshot();
+      return;
+    }
+
+    this.resetSnapshot();
+    this.observeCurrentElement();
+  };
+}
+
+class ElementRectStore extends BaseStore<ElementRect> {
+  constructor() {
+    super(emptyRect);
+  }
+
+  handleEntry = (entry: ResizeObserverEntry) => {
+    const nextRect = readElementRect(entry.target);
+
+    if (areRectsEqual(this.snapshot, nextRect)) {
+      return;
+    }
+
+    this.updateSnapshot(nextRect);
+  };
+
+  protected handleElementChange = (element: Element | null) => {
+    if (!element) {
+      this.resetSnapshot();
+      return;
+    }
+
+    this.updateSnapshot(readElementRect(element));
+    this.observeCurrentElement();
+  };
+}
+
+const useObservedStore = <TSnapshot, TSelected = TSnapshot>(
+  createStore: () => ElementObservationStore<TSnapshot>,
+  selector?: (snapshot: TSnapshot) => TSelected
+): [TSelected, SetRef] => {
+  const storeRef = useRef<ElementObservationStore<TSnapshot> | null>(null);
+
+  if (!storeRef.current) {
+    storeRef.current = createStore();
+  }
+
+  const store = storeRef.current;
+  const selectorRef = useRef(selector);
+  selectorRef.current = selector;
+
+  const getSnapshot = useCallback(
+    () => {
+      const snapshot = store.getSnapshot();
+      return selectorRef.current
+        ? selectorRef.current(snapshot)
+        : ((snapshot as unknown) as TSelected);
+    },
+    [store]
+  );
+
+  const getServerSnapshot = useCallback(
+    () => {
+      const snapshot = store.getServerSnapshot();
+      return selectorRef.current
+        ? selectorRef.current(snapshot)
+        : ((snapshot as unknown) as TSelected);
+    },
+    [store]
+  );
+
+  const value = useSyncExternalStore(
+    store.subscribe,
+    getSnapshot,
+    getServerSnapshot
+  );
+
+  const setRef = useCallback(
+    (element?: Element | null) => {
+      store.setElement(element ?? null);
+    },
+    [store]
+  );
+
+  useIsomorphicLayoutEffect(() => {
+    store.flushPendingNotification();
+
+    return () => {
+      store.cleanup();
+    };
+  }, [store]);
+
+  return [value, setRef];
+};
+
+function useDimensions(): [ElementDimensions, SetRef];
+function useDimensions<T>(
+  selector: (dimensions: ElementDimensions) => T
+): [T, SetRef];
+function useDimensions<T = ElementDimensions>(
+  selector?: (dimensions: ElementDimensions) => T
+): [T, SetRef] {
+  return useObservedStore(() => new ElementDimensionsStore(), selector);
+}
+
+function useElementRect(): [ElementRect, SetRef];
+function useElementRect<T>(selector: (rect: ElementRect) => T): [T, SetRef];
+function useElementRect<T = ElementRect>(
+  selector?: (rect: ElementRect) => T
+): [T, SetRef] {
+  return useObservedStore(() => new ElementRectStore(), selector);
+}
+
+export { useElementRect };
 export default useDimensions;

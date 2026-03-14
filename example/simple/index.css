@@ -1,13 +1,223 @@
+:root {
+  --bg: #0c0c14;
+  --surface: #12121e;
+  --border: rgba(255, 255, 255, 0.06);
+  --text: #c8cad0;
+  --text-muted: #5e6270;
+  --accent: #36f0c8;
+  --accent-dim: rgba(54, 240, 200, 0.12);
+  --mono: "SF Mono", "Fira Code", "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+  --sans: "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  font-family: var(--sans);
+  color: var(--text);
+  background: var(--bg);
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+.page {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.panel {
+  width: min(520px, 100%);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  background: var(--surface);
+  overflow: hidden;
+  box-shadow:
+    0 0 0 1px rgba(0, 0, 0, 0.4),
+    0 32px 80px rgba(0, 0, 0, 0.5);
+}
+
+.panel__titlebar {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.panel__dots {
+  display: flex;
+  gap: 6px;
+}
+
+.panel__dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.panel__label {
+  flex: 1;
+  text-align: center;
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.fps-badge {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+  padding: 0.2rem 0.5rem;
+  border-radius: 6px;
+  background: var(--accent-dim);
+  white-space: nowrap;
+}
+
+.panel__body {
+  padding: 1.5rem;
+}
+
+.observed-box {
+  position: relative;
+  min-height: 120px;
+  border: 1px dashed rgba(54, 240, 200, 0.25);
+  border-radius: 10px;
+  background:
+    repeating-linear-gradient(
+      -45deg,
+      transparent,
+      transparent 8px,
+      rgba(54, 240, 200, 0.02) 8px,
+      rgba(54, 240, 200, 0.02) 16px
+    );
+  transition: width 0.06s linear;
+}
+
+.observed-box::before {
+  content: "observed element";
+  position: absolute;
+  top: 0.5rem;
+  left: 0.75rem;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  opacity: 0.6;
+}
+
+.readout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.readout__field {
+  padding: 0.75rem 0.85rem;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.25);
+}
+
+.readout__label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 0.35rem;
+}
+
+.readout__value {
+  display: block;
+  font-family: var(--mono);
+  font-size: 1.1rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--accent);
+}
+
+.readout__unit {
+  color: var(--text-muted);
+  font-weight: 400;
+  font-size: 0.8rem;
+}
+
+.toggle-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  margin-top: 1.25rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  cursor: pointer;
+  transition: background 120ms ease, border-color 120ms ease;
+}
+
+.toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.toggle-btn[data-active="true"] {
+  border-color: rgba(54, 240, 200, 0.3);
+  background: var(--accent-dim);
+  color: var(--accent);
+}
+
+.toggle-btn__indicator {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--text-muted);
+  transition: background 120ms ease, box-shadow 120ms ease;
+}
+
+.toggle-btn[data-active="true"] .toggle-btn__indicator {
+  background: var(--accent);
+  box-shadow: 0 0 8px rgba(54, 240, 200, 0.5);
+}
+
 @keyframes squeeze {
   from {
-    width: 100px;
-  }
-
-  to {
     width: 100%;
+  }
+  to {
+    width: 40%;
   }
 }
 
-.example {
-  animation: squeeze 3s infinite alternate;
+.animating {
+  animation: squeeze 2.5s ease-in-out infinite alternate;
 }

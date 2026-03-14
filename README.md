@@ -1,25 +1,42 @@
-## `use-element-dimensions` [![Cypress.io tests](https://img.shields.io/badge/cypress.io-tests-green.svg?style=for-the-badge)](https://cypress.io) ![CircleCI](https://img.shields.io/circleci/build/github/danielkov/use-element-dimensions.svg?style=for-the-badge) ![npm](https://img.shields.io/npm/v/use-element-dimensions.svg?style=for-the-badge) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/use-element-dimensions.svg?style=for-the-badge)
+## `use-element-dimensions` ![npm](https://img.shields.io/npm/v/use-element-dimensions.svg?style=for-the-badge) ![npm bundle size](https://img.shields.io/bundlephobia/minzip/use-element-dimensions.svg?style=for-the-badge)
 
-React Hook to figure out DOM Element dimensions with updates
+React hook for observing DOM element dimensions with live updates.
+
+![Animated demo of use-element-dimensions](./demo.gif)
 
 ### Usage
 
 ```jsx
-import useDimensions from "use-element-dimensions";
+import useDimensions, { useElementRect } from "use-element-dimensions";
 
 const Example = () => {
-  const [{ width, height }, ref] = useDimensions();
+  const [entry, dimensionsRef] = useDimensions();
+  const [rect, rectRef] = useElementRect();
+
   return (
-    <div ref={ref}>
-      The width of this div is: {width} and the height is: {height}
-    </div>
+    <>
+      <div ref={dimensionsRef}>
+        Observer content box: {entry.contentRect.width} x {entry.contentRect.height}
+      </div>
+      <div ref={rectRef}>
+        Bounding client rect: {rect.width} x {rect.height}
+      </div>
+    </>
   );
 };
 ```
 
+### Compatibility
+
+- React `16.8+` through `19`
+- Strict Mode / concurrent rendering safe via `useSyncExternalStore`
+- Requires `ResizeObserver` in the runtime environment. If you need to support older browsers, include a polyfill.
+
 ### API
 
-The first item in the tuple returned by the hook includes all properties of the latest [`ResizeObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry) for the specific element.
+#### `useDimensions`
+
+Returns the latest [`ResizeObserverEntry`](https://developer.mozilla.org/en-US/docs/Web/API/ResizeObserverEntry) for the attached element without remapping the observer payload. This is the lower-level, more performant hook because it avoids `getBoundingClientRect()` layout reads.
 
 #### `borderBoxSize`
 
@@ -37,7 +54,9 @@ A DOMRectReadOnly object containing the new size of the observed element when th
 
 A reference to the Element or SVGElement being observed.
 
-The `DOMRect` returned by `target.getBoundingClientRect` also lends its properties to this value.
+#### `useElementRect`
+
+Returns the latest snapshot from `element.getBoundingClientRect()`. This preserves viewport-relative `x`, `y`, `top`, `left`, `right`, and `bottom`, but it performs a layout read when the observed element updates.
 
 #### `x`
 
@@ -81,16 +100,20 @@ There are already some hook libraries that provide dimensions on first render or
 
 ### Development
 
-Everything in this package is in `src/index.ts`. If you want to run an example to develop against, install [`parcel`](https://parceljs.org/) globally and then run `parcel example/simple/index.html` from the root directory of the project.
+Everything in this package lives in `src/index.ts`. To work against an example app, install dependencies and run one of the Vite-powered example scripts:
+
+- `npm run example:simple`
+- `npm run example:multiple`
+- `npm run example:test`
 
 ### Building
 
-Run `yarn build` to build for the three targets specified.
+Run `npm run build` to build the three targets specified.
 
 ### Testing
 
-Integration tests use [Cypress](https://cypress.io), because it is hard to do unit tests for hooks and viewport resizing.
+Run `npm test` to execute the Vitest suite. The tests cover raw observer entries for `useDimensions`, `getBoundingClientRect()` snapshots for `useElementRect`, ref swaps, cleanup, and Strict Mode rendering.
 
 ### Examples
 
-The examples live in the `example` directory. To run any of them, make sure `devDependencies` are installed and run `yarn parcel example/<name>/index.html`.
+The examples live in the `example` directory. To run any of them, install dependencies and use one of the example scripts in `package.json`.

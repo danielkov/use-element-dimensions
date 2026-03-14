@@ -1,21 +1,20 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "jsx": "react",
-    "target": "es5",
+    "jsx": "react-jsx",
+    "target": "ES2020",
     "module": "esnext",
-    "lib": ["es2017", "es7", "es6", "dom"],
+    "lib": ["DOM", "ES2020"],
     "moduleResolution": "node",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
-    "preserveConstEnums": true,
-    "removeComments": false,
     "skipLibCheck": true,
     "sourceMap": true,
     "strict": true,
     "resolveJsonModule": true,
     "declaration": true,
+    "declarationDir": "dist/esm",
     "outDir": "dist"
   },
-  "include": ["src/index.ts"]
+  "include": ["src/**/*"]
 }
