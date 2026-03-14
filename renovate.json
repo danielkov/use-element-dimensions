@@ -5,6 +5,11 @@
   "automergeType": "pr",
   "packageRules": [
     {
+      "description": "Keep the Vite toolchain in sync so npm lockfile updates stay valid",
+      "groupName": "vite ecosystem",
+      "matchPackageNames": ["vite", "vitest", "@vitejs/*", "@vitest/*"]
+    },
+    {
       "description": "Automerge non-major updates for stable packages",
       "matchUpdateTypes": ["minor", "patch", "pin", "digest"],
       "matchCurrentVersion": "!/^0/",
